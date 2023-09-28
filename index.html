@@ -68,28 +68,43 @@
             <div class="heading_container heading_center">
               <h2>Registrate para la copa</h2>
             </div>
-            <form action="">
+            <form action="#">
               <div class="form-row">
                 <div class="form-group col">
-                  <input type="text" class="form-control" placeholder="Nombre" />
+                  <input name="Name" type="text" class="form-control" placeholder="Nombre" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group col-lg-6">
-                  <input type="number" class="form-control" placeholder="Teléfono" />
+                  <input name="Phone" type="number" class="form-control" placeholder="Teléfono" />
                 </div>
                 <div class="form-group col-lg-6">
-                  <select name="" id="" class="form-control wide">
-                    <option value="None">Selecciona tu categoria</option>
-                    <option value="">Infantil</option>
-                    <option value="">Juvenil</option>
-                    <option value="">Libre</option>
+                  <select name="Category" id="" class="form-control wide">
+                    <option value="-1">Selecciona tu categoria</option>
+                    <option value="0">Infantil</option>
+                    <option value="1">Abierta</option>
                   </select>
                 </div>
+                <div class="form-group col-lg-6">
+                  <input name="Age" type="number" class="form-control number" placeholder="Edad" />
+                </div>
+                <div class="form-group col-lg-6">
+                  <input name="Email" type="email" class="form-control" placeholder="Email" />
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group col">
-                  <input type="email" class="form-control" placeholder="Email" />
+                  <fieldset style="margin-left: 10px;">
+                    <h3>Elige tu rama</h3>
+                    <div style="margin-top: 10px;">
+                      <input type="checkbox" id="speed" name="speed" />
+                      <label for="speed">Velocidad</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" id="sync" name="sync" />
+                      <label for="sync">Trazo sincronizado</label>
+                    </div>
+                  </fieldset>                  
                 </div>
               </div>
               <div class="form-row">
@@ -98,7 +113,7 @@
                 </div>
               </div>
               <div class="btn_box">
-                <button style="background-color: rgb(145, 43, 43);">
+                <button style="background-color: rgb(145, 43, 43);" onclick="return sendData()">
                   SEND
                 </button>
               </div>
@@ -108,6 +123,81 @@
       </div>
     </div>
   </section>
+  <script>
+    $('form').submit(false);
+
+    function sendData() {
+      event.preventDefault();
+      $('form').submit(false);
+      const formData = new FormData(document.querySelector('form'));
+      const hasSpeed = document.getElementById("speed").checked;
+      const hasSync = document.getElementById("sync").checked;
+      let branch = ""
+      if (!hasSpeed && !hasSync) {
+        alert("Debes seleccionar solamente una rama");
+        return;
+      }
+      else if (hasSpeed && hasSync) {
+        branch = "Ambas";
+      }
+      else {
+        branch = hasSpeed ? "Velocidad" : "Trazo sincronizado";
+      }
+      //Let's create our request object here
+      const name = formData.get("Name");
+      const phone = formData.get("Phone");
+      const category = formData.get("Category");
+      const age = formData.get("Age");
+      const email = formData.get("Email");
+
+      const data = {
+        Name: name,
+        Phone: phone,
+        Category: category,
+        Age: age,
+        Email: email,
+        Branch: branch 
+      };
+
+      /*$.ajax({
+        type: "POST",
+        url: "http://3.143.251.111/entry",
+        data: JSON.stringify(data),
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        success: function (result) {
+            console.log(result);
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        dataType: "json"
+      });*/
+      
+      fetch("http://3.143.251.111/entry", {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify(data)
+      }).then(res => {
+        console.log(res);
+        if (res.status < 400) {
+          alert("Hemos realizado tu registro exitosamente, descarga tu carta responsiva y nos vemos allá!");
+        }
+        else {
+          alert(`Se presentó un error con tu registro, contacta al administrador con el código ${res.status} y el mensaje ${res.body}`);
+        }
+      }).catch(err => {
+        console.log(err);
+      });
+      return false;
+    }
+  </script>
   <!-- end contact section -->
 
   <!-- end info_section -->
