@@ -182,7 +182,12 @@
 			}).catch((_) => {
 				details = "Error no identificado";
 			}).finally(
-				() => alert(`Se presentó un error con tu registro, contacta al administrador con el código ${res.status} y el mensaje ${details}`)
+				() => {
+					if (details.message !== undefined) {
+						details = `${details.message} [${details.from}]`;
+					}
+					alert(`Se presentó un error con tu registro, contacta al administrador con el código ${res.status} y el mensaje ${details}`);
+				}
 			);
         }
       }).catch(err => {
