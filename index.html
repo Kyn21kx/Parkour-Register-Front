@@ -134,7 +134,7 @@
       const hasSync = document.getElementById("sync").checked;
       let branch = ""
       if (!hasSpeed && !hasSync) {
-        alert("Debes seleccionar solamente una rama");
+        alert("Debes seleccionar al menos una rama");
         return;
       }
       else if (hasSpeed && hasSync) {
@@ -158,23 +158,6 @@
         Email: email,
         Branch: branch 
       };
-
-      /*$.ajax({
-        type: "POST",
-        url: "http://3.143.251.111/entry",
-        data: JSON.stringify(data),
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json'
-        },
-        success: function (result) {
-            console.log(result);
-        },
-        error: function(error) {
-          console.log(error);
-        },
-        dataType: "json"
-      });*/
       
       fetch("https://pk-app.azurewebsites.net/entry", {
         method: "POST",
@@ -187,8 +170,11 @@
       }).then(res => {
         console.log(res);
         if (res.status < 400) {
-          alert("Hemos realizado tu registro exitosamente, descarga tu carta responsiva y nos vemos allá!");
-        }
+			alert("Hemos realizado tu registro exitosamente, descarga tu carta responsiva y nos vemos allá!");
+			res.blob().then((blob) => {
+				saveBlob(blob);
+			})
+		}
         else {
           alert(`Se presentó un error con tu registro, contacta al administrador con el código ${res.status} y el mensaje ${res.body}`);
         }
@@ -197,6 +183,37 @@
       });
       return false;
     }
+
+    function saveBlob(blob) {
+      var filename = "";
+        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+            // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+            window.navigator.msSaveBlob(blob, filename);
+        } 
+        else {
+			var URL = window.URL || window.webkitURL;
+			var downloadUrl = URL.createObjectURL(blob);
+
+			if (filename) {
+				// use HTML5 a[download] attribute to specify filename
+				var a = document.createElement("a");
+				// safari doesn't support this yet
+				if (typeof a.download === 'undefined') {
+					window.location.href = downloadUrl;
+				} 
+				else {
+					a.href = downloadUrl;
+					a.download = filename;
+					document.body.appendChild(a);
+					a.click();
+				}
+			} 
+			else {
+				window.location.href = downloadUrl;
+			}
+        }
+    }
+
   </script>
   <!-- end contact section -->
 
